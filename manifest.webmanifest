@@ -1,7 +1,7 @@
 {
   "name": "Hanzi Drill",
   "short_name": "Hanzi Drill",
-  "description": "Practice your 1,000 Chinese characters: study origins, read, recall and write.",
+  "description": "Practice the 1,000 most common Chinese characters or the HSK 3.0 word list: study origins, read, recall and write.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

@@ -1,0 +1,16 @@
+hsk.js (the HSK 3.0 curriculum) contains:
+
+- The HSK 3.0 word list and pinyin from krmanik/HSK-3.0
+  (https://github.com/krmanik/HSK-3.0, commit 6d52713), which follows the
+  HSK examination syllabus 中文水平考试HSK考试大纲 published November 2025.
+  Licensed CC BY-SA 4.0.
+- English meanings from CC-CEDICT (https://cc-cedict.org), shortened.
+  Licensed CC BY-SA 4.0.
+- Character origins, parts and radicals from Make Me a Hanzi (LGPL, see
+  makemeahanzi-LGPL.txt) and traditional forms from OpenCC (Apache 2.0).
+
+hsk.js is distributed under the Creative Commons Attribution-ShareAlike 4.0
+International license: https://creativecommons.org/licenses/by-sa/4.0/legalcode
+
+The stroke data in strokes/h*.json comes from hanzi-writer-data 2.0.1 (see
+stroke-data-ARPHICPL.txt).

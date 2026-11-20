@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Hanzi Drill</title>
-<meta name="description" content="Practice your 1,000 Chinese characters: study origins, read, recall and write.">
+<meta name="description" content="Practice the 1,000 most common Chinese characters or the HSK 3.0 word list: study origins, read, recall and write.">
 <meta name="theme-color" content="#2C6B57">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -59,6 +59,9 @@ input:focus-visible,button:focus-visible{outline:2px solid var(--jade);outline-o
 .chips{display:flex;gap:8px;flex-wrap:wrap}
 .chip{font:500 14px var(--ui);border:1px solid var(--line);background:var(--paper);color:var(--ink);padding:8px 12px;border-radius:999px;cursor:pointer}
 .chip:active{transform:scale(.97)}
+.chip[aria-pressed="true"]{border-color:var(--jade);background:var(--jade-soft);color:var(--jade)}
+.seg button:disabled{cursor:progress;opacity:.6}
+.btn:disabled{opacity:.55;cursor:progress}
 .seg{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:4px}
 .seg.len{grid-template-columns:repeat(4,1fr)}
 .seg button{font:600 15px var(--ui);border:0;background:transparent;color:var(--muted);padding:10px 4px;border-radius:9px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}
@@ -80,12 +83,17 @@ input:focus-visible,button:focus-visible{outline:2px solid var(--jade);outline-o
 .prog i{display:block;height:100%;background:var(--jade);width:0;transition:width .25s}
 .tally{font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
 .prompt{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
-.box{position:relative;width:min(62vw,230px);aspect-ratio:1;max-width:100%;background:var(--sheet);border:2px solid var(--seal);border-radius:4px}
-.box.big{width:min(86vw,300px)}
+.box{--s:min(62vw,230px);position:relative;width:var(--s);aspect-ratio:1;max-width:100%;background:var(--sheet);border:2px solid var(--seal);border-radius:4px;flex:none}
+.box.big{--s:min(86vw,300px)}
 .box svg.g{position:absolute;inset:0;width:100%;height:100%}
 .box svg.g line{stroke:var(--grid);stroke-width:1;stroke-dasharray:4 4}
-.box .glyph{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--han);font-weight:500;font-size:min(44vw,165px);line-height:1;color:var(--ink)}
+.box .glyph{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--han);font-weight:500;font-size:calc(var(--s) * .717);line-height:1;color:var(--ink)}
 .box .writer{position:absolute;inset:0;touch-action:none}
+.word{display:flex;gap:6px;justify-content:center;max-width:100%}
+.slots{display:flex;gap:6px;justify-content:center}
+.slots .box{--s:44px;border-width:1.5px;border-color:var(--line)}
+.slots .box.on{border-color:var(--seal)}
+.slots .glyph.q{color:var(--muted);font-family:var(--ui);font-size:20px}
 .meaning{font-size:24px;font-weight:600;max-width:30ch;text-wrap:balance;margin:0}
 .py{font-size:20px;color:var(--jade);font-weight:600;margin:0}
 .meta{font-size:13px;color:var(--muted);margin:0}
@@ -107,6 +115,7 @@ input:focus-visible,button:focus-visible{outline:2px solid var(--jade);outline-o
 .tools button[aria-pressed="true"]{border-color:var(--ochre);background:var(--ochre-soft)}
 
 /* origin card */
+.prompt > .origin{align-self:stretch}
 .origin{background:var(--sheet);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;display:flex;flex-direction:column;gap:10px;text-align:left}
 .o-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
 .badge{font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:3px 8px;border-radius:6px}
@@ -126,6 +135,10 @@ input:focus-visible,button:focus-visible{outline:2px solid var(--jade);outline-o
 .part .tag{font-size:11px;color:var(--seal);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
 .o-rad{margin:0;font-size:13px;color:var(--muted)}
 .o-rad .h{font-family:var(--han);font-size:17px;color:var(--ink)}
+.o-who{display:flex;align-items:center;gap:10px;min-width:0}
+.o-who .oc{font-family:var(--han);font-size:34px;line-height:1}
+.o-who .og{font-size:14px;line-height:1.3;min-width:0}
+.o-who .og b{color:var(--jade);font-weight:600;margin-right:6px}
 
 /* study */
 .nav{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -134,10 +147,11 @@ input:focus-visible,button:focus-visible{outline:2px solid var(--jade);outline-o
 .score{font-size:48px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1;margin:0}
 .score small{font-size:20px;color:var(--muted);font-weight:500}
 .miss{display:flex;flex-direction:column}
-.miss button{display:grid;grid-template-columns:44px 56px 1fr;gap:10px;align-items:center;padding:10px 0;border:0;border-top:1px solid var(--line);background:none;color:var(--ink);text-align:left;font:inherit;cursor:pointer}
+.miss button{display:grid;grid-template-columns:minmax(44px,max-content) 1fr;gap:12px;align-items:center;padding:10px 0;border:0;border-top:1px solid var(--line);background:none;color:var(--ink);text-align:left;font:inherit;cursor:pointer}
 .miss button:first-child{border-top:0}
-.miss .h{font-family:var(--han);font-size:30px}
-.miss .d{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.miss .h{font-family:var(--han);font-size:30px;white-space:nowrap}
+.miss .h.long{font-size:22px}
+.miss .d{display:block;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
 .miss .t{min-width:0}
 .miss .t b{color:var(--jade);font-weight:600;margin-right:6px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -148,25 +162,28 @@ input:focus-visible,button:focus-visible{outline:2px solid var(--jade);outline-o
   <section class="view" id="setup">
     <header>
       <h1><span class="han">汉字</span>Hanzi Drill</h1>
-      <p class="sub">Practice the characters from your 1,000-character list.</p>
+      <p class="sub" id="sub">Practice the characters from your 1,000-character list.</p>
       <p class="status" id="offline" hidden>Available offline</p>
     </header>
 
     <div class="panel">
-      <p class="label">Which characters</p>
+      <p class="label">Curriculum</p>
+      <div class="seg" id="cur">
+        <button data-v="freq" aria-pressed="true">Top 1,000<small>most common characters</small></button>
+        <button data-v="hsk" aria-pressed="false">HSK 3.0<small>11,068 words · levels 1–9</small></button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <p class="label" id="whichL">Which characters</p>
+      <div class="chips" id="levels" hidden></div>
       <div class="row">
-        <label class="field"><span>From day</span><input id="from" type="number" inputmode="numeric" min="1" max="1000"></label>
-        <label class="field"><span>To day</span><input id="to" type="number" inputmode="numeric" min="1" max="1000"></label>
+        <label class="field"><span id="fromL">From day</span><input id="from" type="number" inputmode="numeric" min="1" max="1000"></label>
+        <label class="field"><span id="toL">To day</span><input id="to" type="number" inputmode="numeric" min="1" max="1000"></label>
       </div>
-      <div class="chips" id="presets">
-        <button class="chip" data-p="all">All I've learned</button>
-        <button class="chip" data-p="1">Today's</button>
-        <button class="chip" data-p="7">Last 7</button>
-        <button class="chip" data-p="30">Last 30</button>
-        <button class="chip" data-p="100">Last 100</button>
-      </div>
+      <div class="chips" id="presets"></div>
       <div class="row" style="justify-content:space-between">
-        <label class="field" style="max-width:170px"><span>I've learned up to day</span><input id="learned" type="number" inputmode="numeric" min="1" max="1000"></label>
+        <label class="field" style="max-width:170px"><span id="learnedL">I've learned up to day</span><input id="learned" type="number" inputmode="numeric" min="1" max="1000"></label>
         <p class="count" id="count"></p>
       </div>
     </div>
@@ -251,8 +268,10 @@ input:focus-visible,button:focus-visible{outline:2px solid var(--jade);outline-o
 <script src="data.js"></script>
 <script src="hanzi-writer.min.js"></script>
 <script>
-const WORDS = window.HANZI; // [char, pinyin, meaning, origin] in day order
-const N = WORDS.length;
+const FREQ = window.HANZI; // [char, pinyin, meaning, origin] in day order
+const FREQ_IDX = new Map(FREQ.map((w, i) => [w[0], i]));
+// The active curriculum's items, [text, pinyin, meaning, ...] in study order. Item numbers ("day") are 1-based.
+let WORDS = FREQ, N = FREQ.length;
 const $ = id => document.getElementById(id);
 const app = $('app');
 const GRID = '<svg class="g" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line x1="50" y1="0" x2="50" y2="100"/><line x1="0" y1="50" x2="100" y2="50"/><line x1="0" y1="0" x2="100" y2="100"/><line x1="100" y1="0" x2="0" y2="100"/></svg>';
@@ -261,20 +280,101 @@ const shuffle = a => { for (let i=a.length-1;i>0;i--){ const j=Math.random()*(i+
 
 /* ---------- saved settings ---------- */
 const KEY = 'hanzi-drill-v1';
-const startDay = Math.max(1, Math.min(N, Math.floor((Date.now() - new Date(2026, 9, 2)) / 864e5) + 1));
-let S = {learned: startDay, from: 1, to: startDay, mode: 'read', len: 20, focus: true, miss: {}, hit: {}};
+const startDay = Math.max(1, Math.min(FREQ.length, Math.floor((Date.now() - new Date(2026, 9, 2)) / 864e5) + 1));
+// cur: the curriculum used last, reopened on the next launch. prog: range and progress per curriculum.
+// miss/hit are keyed by the character or word, so a character counts the same in both curricula.
+let S = {cur: 'freq', mode: 'read', len: 20, focus: true, miss: {}, hit: {}, prog: {}};
 try { const raw = localStorage.getItem(KEY); if (raw) S = Object.assign(S, JSON.parse(raw)); } catch (e) {}
+if (S.learned !== undefined){ // settings saved before there was a choice of curriculum
+  S.prog.freq = S.prog.freq || {learned: S.learned, from: S.from, to: S.to};
+  delete S.learned; delete S.from; delete S.to;
+}
+const CUR = {
+  freq: {sub: 'Practice the characters from your 1,000-character list.', what: 'characters', one: 'character', unit: 'day',
+         presets: [['all', "All I've learned"], [1, "Today's"], [7, 'Last 7'], [30, 'Last 30'], [100, 'Last 100']],
+         start: {learned: startDay, from: 1, to: startDay}},
+  hsk:  {sub: 'Practice the HSK 3.0 vocabulary (2025 exam syllabus), level by level.', what: 'words', one: 'word', unit: 'word',
+         presets: [['all', "All I've learned"], [10, 'Last 10'], [30, 'Last 30'], [100, 'Last 100']],
+         start: {learned: 300, from: 1, to: 300}},
+};
+if (!CUR[S.cur]) S.cur = 'freq';
+const P = () => S.prog[S.cur] || (S.prog[S.cur] = Object.assign({}, CUR[S.cur].start));
 function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
 const clamp = v => Math.max(1, Math.min(N, Math.round(+v || 1)));
 function show(v){ app.dataset.view = v; window.scrollTo(0, 0); }
+
+/* ---------- curricula ---------- */
+const levelOf = d => S.cur === 'hsk' ? HSK.levels.find(l => d >= l[1] && d <= l[2]) : null;
+// Where an item sits in its curriculum, e.g. "Day 12" or "HSK 2 · #340"
+const tag = d => S.cur === 'hsk' ? `${levelOf(d)[0]} · #${d}` : `Day ${d}`;
+let hskLoad = null;
+function loadHSK(){
+  if (window.HSK) return Promise.resolve();
+  return hskLoad || (hskLoad = new Promise((ok, fail) => {
+    const s = document.createElement('script');
+    s.src = 'hsk.js';
+    s.onload = () => window.HSK ? ok() : fail(new Error('empty'));
+    s.onerror = () => { s.remove(); hskLoad = null; fail(new Error('load')); };
+    document.head.appendChild(s);
+  }));
+}
+let hskChunk = null;
+function activate(k){
+  WORDS = k === 'hsk' ? HSK.words : FREQ; N = WORDS.length;
+  if (k === 'hsk' && !hskChunk){ hskChunk = new Map(); [...HSK.strokes].forEach((c, i) => hskChunk.set(c, 'h' + Math.floor(i / 200))); }
+}
+async function useCurriculum(k){
+  if (k === 'hsk' && !window.HSK){
+    setBusy(true);
+    try { await loadHSK(); }
+    catch (e){ setBusy(false); paintCur(); $('err').textContent = 'The HSK list could not load. Open the app once while online so it is saved for offline use.'; $('err').hidden = false; return false; }
+    setBusy(false);
+  }
+  activate(k); S.cur = k; save(); paintSetup();
+  return true;
+}
+let busy = false;
+function setBusy(on){
+  busy = on;
+  for (const b of $('cur').children) b.disabled = on;
+  for (const id of ['from', 'to', 'learned']) $(id).disabled = on;
+  $('start').disabled = on;
+  if (on) $('count').textContent = 'Loading the HSK list…';
+}
+function paintCur(){ for (const b of $('cur').children) b.setAttribute('aria-pressed', b.dataset.v === S.cur); }
+$('cur').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b || b.dataset.v === S.cur) return;
+  for (const x of $('cur').children) x.setAttribute('aria-pressed', x === b);
+  useCurriculum(b.dataset.v);
+});
+
+/* ---------- characters inside items ---------- */
+// [pinyin, gloss, origin] for one character, from the 1,000 list or the HSK file
+function charInfo(c){
+  const i = FREQ_IDX.get(c);
+  if (i !== undefined){ const w = FREQ[i]; return [w[1], w[2], w[3]]; }
+  return (window.HSK && HSK.chars[c]) || ['', '', null];
+}
+// Box size for an n-character word: share the column (16px gutters, 6px gaps, 2px borders), up to a cap
+const fit = n => n <= 1 ? '' : ` style="--s:min(calc((100vw - ${32 + (n - 1) * 6 + n * 4}px) / ${n}), ${[0, 0, 180, 140, 110][n] || 96}px)"`;
+// A row of 田字格 boxes, one per character
+function boxesHTML(text, idp){
+  const cs = [...text];
+  return `<div class="word">${cs.map((c, i) => `<div class="box"${fit(cs.length)}${idp ? ` id="${idp}box${i}"` : ''}>${GRID}<div class="glyph"${idp ? ` id="${idp}glyph${i}"` : ''}>${c}</div>${idp ? `<div class="writer" id="${idp}target${i}"></div>` : ''}</div>`).join('')}</div>`;
+}
+// Origin cards for an item: one for a single character, one per distinct character for a word
+function originsHTML(text){
+  const cs = [...new Set(text)];
+  return cs.length === 1 ? originHTML(cs[0]) : cs.map(c => originHTML(c, {head: true})).join('');
+}
 
 /* ---------- origin card ---------- */
 const BADGE = {p: 'Picture', i: 'Combined idea', s: 'Meaning + sound', n: 'Origin note'};
 const bare = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ü/g,'v').toLowerCase();
 function hanSpan(text){ return esc(text).replace(/([⺀-⿟㐀-鿿豈-﫿])/g, '<span class="h">$1</span>'); }
-function originHTML(day, opts = {}){
-  const [c, py, , o] = WORDS[day-1];
-  if (!o) return '';
+function originHTML(c, opts = {}){
+  const [py, gl, o0] = charInfo(c), o = o0 || {};
+  const who = opts.head ? `<span class="o-who"><span class="oc">${c}</span><span class="og">${py ? `<b>${esc(py)}</b>` : ''}${esc(gl)}</span></span>` : '';
   let text = '';
   if (o.t === 's'){
     const bits = [];
@@ -284,7 +384,7 @@ function originHTML(day, opts = {}){
       bits.push(`${o.ph[0]}${o.ph[1] ? ' ' + o.ph[1] : ''} gives the sound${o.ph[1] ? (same ? ' (same syllable)' : ' (a close sound, at least historically)') : ''}`);
     }
     text = bits.join('; ') + '.';
-  } else text = o.h || '';
+  } else if (o.t) text = o.h || '';
   const parts = (o.pa || []).map(p => {
     const isRad = o.r && p[0] === o.r[0];
     return `<span class="part"><span class="pc">${p[0]}</span><span class="pd">${p[1] ? `<b>${esc(p[1])}</b>` : ''}<span>${esc(p[2] || '')}</span>${isRad ? '<span class="tag">Radical</span>' : ''}</span></span>`;
@@ -294,8 +394,11 @@ function originHTML(day, opts = {}){
   if (opts.partsOnly){
     return `<div class="origin"><div class="o-head"><span class="label" style="margin:0">Parts</span></div>${parts ? `<div class="parts">${parts}</div>` : '<p class="o-text">This one is a single picture with no smaller parts.</p>'}${rad}</div>`;
   }
+  const badge = BADGE[o.t] ? `<span class="badge ${o.t}">${BADGE[o.t]}</span>` : '';
+  const trad = o.tr ? `<span class="trad">Traditional<b>${esc(o.tr)}</b></span>` : '';
+  if (!who && !badge && !trad && !text && !parts && !rad) return '';
   return `<div class="origin">
-    <div class="o-head"><span class="badge ${o.t}">${BADGE[o.t]}</span>${o.tr ? `<span class="trad">Traditional<b>${esc(o.tr)}</b></span>` : ''}</div>
+    ${who ? `<div class="o-head">${who}${trad}</div>${badge ? `<div class="o-head">${badge}</div>` : ''}` : (badge || trad ? `<div class="o-head">${badge}${trad}</div>` : '')}
     ${text ? `<p class="o-text">${hanSpan(text)}</p>` : ''}
     ${parts ? `<div class="parts">${parts}</div>` : ''}${rad}
   </div>`;
@@ -303,7 +406,18 @@ function originHTML(day, opts = {}){
 
 /* ---------- setup screen ---------- */
 function paintSetup(){
-  $('from').value = S.from; $('to').value = S.to; $('learned').value = S.learned;
+  const k = CUR[S.cur], p = P();
+  paintCur();
+  $('sub').textContent = k.sub;
+  $('whichL').textContent = 'Which ' + k.what;
+  $('fromL').textContent = k.unit === 'day' ? 'From day' : 'From word #';
+  $('toL').textContent = k.unit === 'day' ? 'To day' : 'To word #';
+  $('learnedL').textContent = k.unit === 'day' ? "I've learned up to day" : "I've learned up to word #";
+  for (const id of ['from', 'to', 'learned']) $(id).max = N;
+  $('presets').innerHTML = k.presets.map(([v, t]) => `<button class="chip" data-p="${v}">${t}</button>`).join('');
+  $('levels').hidden = S.cur !== 'hsk';
+  $('levels').innerHTML = S.cur === 'hsk' ? HSK.levels.map(([t, a, b]) => `<button class="chip" data-a="${a}" data-b="${b}" aria-pressed="false">${t}</button>`).join('') : '';
+  $('from').value = clamp(p.from); $('to').value = clamp(p.to); $('learned').value = clamp(p.learned);
   $('focus').checked = S.focus;
   paintControls();
 }
@@ -314,22 +428,33 @@ function paintControls(){
   $('start').textContent = S.mode === 'study' ? 'Start studying' : 'Start';
   $('err').hidden = true;
   updateCount();
-  const weak = Object.entries(S.miss).filter(([c,m]) => m - (S.hit[c]||0)*0.5 > 0).sort((a,b)=>b[1]-a[1]).slice(0,8).map(x=>x[0]);
+  const here = new Set(WORDS.map(w => w[0]));
+  const weak = Object.entries(S.miss).filter(([c,m]) => here.has(c) && m - (S.hit[c]||0)*0.5 > 0).sort((a,b)=>b[1]-a[1]).slice(0,8).map(x=>x[0]);
   $('weakLine').hidden = !weak.length;
   if (weak.length) $('weakLine').textContent = 'Most missed so far: ' + weak.join(' ');
 }
 function readRange(){ let a = clamp($('from').value), b = clamp($('to').value); return a <= b ? [a, b] : [b, a]; }
 function updateCount(){
-  const [a,b] = readRange(), n = b - a + 1;
-  $('count').innerHTML = `<b>${n}</b> character${n>1?'s':''} · ${WORDS[a-1][0]} to ${WORDS[b-1][0]}`;
+  const [a,b] = readRange(), n = b - a + 1, k = CUR[S.cur];
+  let where = '';
+  if (S.cur === 'hsk'){
+    const la = levelOf(a)[0], lb = levelOf(b)[0];
+    where = ' · ' + (la === lb ? la : `${la} to ${lb}`);
+    for (const c of $('levels').children) c.setAttribute('aria-pressed', +c.dataset.a === a && +c.dataset.b === b);
+  }
+  $('count').innerHTML = `<b>${n}</b> ${n > 1 ? k.what : k.one} · ${esc(WORDS[a-1][0])} to ${esc(WORDS[b-1][0])}${where}`;
 }
 ['from','to'].forEach(id => $(id).addEventListener('input', updateCount));
-$('learned').addEventListener('change', () => { S.learned = clamp($('learned').value); $('learned').value = S.learned; save(); });
+$('learned').addEventListener('change', () => { P().learned = clamp($('learned').value); $('learned').value = P().learned; save(); });
 $('presets').addEventListener('click', e => {
-  const p = e.target.dataset.p; if (!p) return;
-  S.learned = clamp($('learned').value); save();
-  const end = S.learned, start = p === 'all' ? 1 : Math.max(1, end - +p + 1);
+  const p = e.target.dataset.p; if (!p || busy) return;
+  P().learned = clamp($('learned').value); save();
+  const end = P().learned, start = p === 'all' ? 1 : Math.max(1, end - +p + 1);
   $('from').value = start; $('to').value = end; updateCount();
+});
+$('levels').addEventListener('click', e => {
+  const b = e.target.closest('[data-a]'); if (!b) return;
+  $('from').value = b.dataset.a; $('to').value = b.dataset.b; updateCount();
 });
 for (const id of ['mode','len']) $(id).addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
@@ -337,8 +462,9 @@ for (const id of ['mode','len']) $(id).addEventListener('click', e => {
   save(); paintControls();
 });
 $('start').addEventListener('click', () => {
+  if (busy) return;
   const [a,b] = readRange();
-  S.from = a; S.to = b; S.focus = $('focus').checked; save();
+  P().from = a; P().to = b; S.focus = $('focus').checked; save();
   const days = []; for (let d=a; d<=b; d++) days.push(d);
   if (S.mode === 'study') startStudy(days); else startQuiz(null);
 });
@@ -357,12 +483,20 @@ function pickQuestions(days, n){
   return out;
 }
 function words(m){ return new Set(m.toLowerCase().replace(/\(.*?\)/g,'').split(/[;,]/).map(s=>s.trim()).filter(Boolean)); }
-function clash(a, b){ const A = words(WORDS[a-1][2]); for (const w of words(WORDS[b-1][2])) if (A.has(w)) return true; return WORDS[a-1][1] === WORDS[b-1][1]; }
+function clash(a, b){
+  const [x, y] = [WORDS[a-1], WORDS[b-1]];
+  if (x[0] === y[0] || x[1] === y[1]) return true; // same word at two HSK levels, or same sound
+  const A = words(x[2]); for (const w of words(y[2])) if (A.has(w)) return true;
+  return false;
+}
+const len = d => [...WORDS[d-1][0]].length;
 function distractors(day, [lo, hi]){
   const cands = [];
   for (let d = lo; d <= hi; d++) if (d !== day) cands.push(d);
   for (let r = 1; cands.length < 12 && r < N; r++){ if (lo - r >= 1) cands.push(lo - r); if (hi + r <= N) cands.push(hi + r); }
   shuffle(cands);
+  // Options with the same number of characters first, so length doesn't give the answer away
+  const n = len(day); cands.sort((p, q) => (len(p) !== n) - (len(q) !== n));
   const out = [];
   for (const d of cands){
     if (out.length === 3) break;
@@ -387,23 +521,23 @@ function hud(){
   $('tally').textContent = `${Math.min(Q.i+1, Q.list.length)} / ${Q.list.length} · ✓ ${Q.right}`;
 }
 const canSpeak = 'speechSynthesis' in window;
-const speakBtn = c => canSpeak ? `<button class="pill" data-say="${c}">🔊 Hear it</button>` : '';
+const speakBtn = c => canSpeak ? `<button class="pill" data-say="${esc(c)}">🔊 Hear it</button>` : '';
 document.addEventListener('click', e => {
   const s = e.target.closest('[data-say]'); if (!s) return;
   try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(s.dataset.say); u.lang = 'zh-CN'; u.rate = .8; speechSynthesis.speak(u); } catch (err) {}
 });
-function killWriter(){ if (writer){ try { writer.cancelQuiz(); } catch (e) {} writer = null; } }
+function killWriter(){ wToken++; if (writer){ try { writer.cancelQuiz(); } catch (e) {} writer = null; } }
 function ask(){
   clearTimeout(autoT); answered = false; hud(); killWriter();
   const day = Q.list[Q.i], [c, , mn] = WORDS[day-1];
   $('fb').textContent = ''; $('fb').className = 'feedback';
   $('next').hidden = true; $('opts').innerHTML = ''; $('wtools').hidden = true; $('after').innerHTML = ''; $('wpartsBox').innerHTML = '';
   if (Q.mode === 'read'){
-    $('prompt').innerHTML = `<div class="box">${GRID}<div class="glyph">${c}</div></div>`;
-    renderOpts(day, d => `<span class="o-py">${WORDS[d-1][1]}</span><span class="o-mn">${esc(WORDS[d-1][2])}</span>`);
+    $('prompt').innerHTML = boxesHTML(c);
+    renderOpts(day, d => `<span class="o-py">${esc(WORDS[d-1][1])}</span><span class="o-mn">${esc(WORDS[d-1][2])}</span>`);
   } else if (Q.mode === 'recall'){
-    $('prompt').innerHTML = `<p class="label" style="margin:0">Which character means</p><p class="meaning">${esc(mn)}</p>`;
-    renderOpts(day, d => `<span class="o-han">${WORDS[d-1][0]}</span><span class="o-py">${WORDS[d-1][1]}</span>`);
+    $('prompt').innerHTML = `<p class="label" style="margin:0">Which ${CUR[S.cur].one} means</p><p class="meaning">${esc(mn)}</p>`;
+    renderOpts(day, d => `<span class="o-han" style="font-size:${[44, 44, 38, 30, 26][len(d)] || 24}px">${WORDS[d-1][0]}</span><span class="o-py">${esc(WORDS[d-1][1])}</span>`);
   } else askWrite(day);
 }
 function renderOpts(day, html){
@@ -415,7 +549,7 @@ function reveal(day, ok, msg){
   const [c, py, mn] = WORDS[day-1];
   $('fb').className = 'feedback ' + (ok ? 'good' : 'bad');
   $('fb').innerHTML = `${msg} · ${c} ${esc(py)}, ${esc(mn)}`;
-  $('after').innerHTML = `<div style="display:flex;flex-direction:column;gap:10px;align-items:center">${speakBtn(c)}<p class="meta">Day ${day}</p></div>` + originHTML(day);
+  $('after').innerHTML = `<div style="display:flex;flex-direction:column;gap:10px;align-items:center">${speakBtn(c)}<p class="meta">${tag(day)}</p></div>` + originsHTML(c);
   $('next').hidden = false;
 }
 function choose(d){
@@ -443,11 +577,13 @@ $('next').addEventListener('click', next);
 $('quit').addEventListener('click', () => { clearTimeout(autoT); killWriter(); if (Q.i || answered) finish(true); else { show('setup'); paintSetup(); } });
 
 /* ---------- writing ---------- */
+// Stroke data: strokes/s0.json to s9.json follow the 1,000 list (100 each); strokes/h*.json hold the other HSK characters
 const chunks = {};
 function loadChar(c){
-  const day = WORDS.findIndex(w => w[0] === c) + 1, k = Math.floor((day-1)/100);
-  if (!chunks[k]) chunks[k] = fetch(`strokes/s${k}.json`).then(r => { if (!r.ok) throw new Error('load'); return r.json(); }).catch(e => { delete chunks[k]; throw e; });
-  return chunks[k].then(j => j[c]);
+  const i = FREQ_IDX.get(c), k = i !== undefined ? 's' + Math.floor(i / 100) : hskChunk && hskChunk.get(c);
+  if (!k) return Promise.reject(new Error('no stroke data for ' + c));
+  if (!chunks[k]) chunks[k] = fetch(`strokes/${k}.json`).then(r => { if (!r.ok) throw new Error('load'); return r.json(); }).catch(e => { delete chunks[k]; throw e; });
+  return chunks[k].then(j => { if (!j[c]) throw new Error('no stroke data for ' + c); return j[c]; });
 }
 const tok = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 function makeWriter(target, c, size, extra){
@@ -459,24 +595,46 @@ function makeWriter(target, c, size, extra){
     onLoadCharDataError: () => { $('fb').className = 'feedback bad'; $('fb').textContent = 'Stroke data did not load. Open the app once while online.'; }
   }, extra));
 }
+// A word is written one character at a time in the big box; the small slots above show progress.
 function askWrite(day){
-  const [, py, mn] = WORDS[day-1];
-  $('prompt').innerHTML = `<p class="py">${esc(py)}</p><p class="meaning">${esc(mn)}</p><div class="box big" id="wbox">${GRID}<div class="writer" id="wtarget"></div></div>`;
+  const [w, py, mn] = WORDS[day-1], chars = [...w];
+  const slots = chars.length > 1 ? `<div class="slots" id="wslots">${chars.map((c, i) => `<div class="box${i ? '' : ' on'}"><div class="glyph q">${i + 1}</div></div>`).join('')}</div>` : '';
+  $('prompt').innerHTML = `<p class="py">${esc(py)}</p><p class="meaning">${esc(mn)}</p>${slots}<div class="box big" id="wbox">${GRID}<div class="writer" id="wtarget"></div></div>`;
   $('wtools').hidden = false;
   for (const id of ['wParts','wHint']) $(id).setAttribute('aria-pressed', 'false');
-  $('fb').textContent = 'Draw the character in the box.';
-  wState = {day, outline: false};
+  $('fb').textContent = chars.length > 1 ? `Draw the ${chars.length} characters one at a time, starting with the first.` : 'Draw the character in the box.';
+  wState = {day, chars, k: 0, outline: false, slips: 0, token: wToken};
   const size = $('wbox').clientWidth - 4;
-  writer = makeWriter('wtarget', WORDS[day-1][0], size, {showCharacter: false, showOutline: false, showHintAfterMisses: 3, drawingWidth: Math.max(14, size/18)});
+  writer = makeWriter('wtarget', chars[0], size, {showCharacter: false, showOutline: false, showHintAfterMisses: 3, drawingWidth: Math.max(14, size/18)});
   quiz();
 }
+let wToken = 0; // bumped whenever the writer is replaced, so late callbacks from the old one are ignored
+function fillSlot(i, on){
+  const s = $('wslots'); if (!s) return;
+  const b = s.children[i]; b.querySelector('.glyph').className = 'glyph'; b.querySelector('.glyph').textContent = wState.chars[i];
+  for (const x of s.children) x.classList.toggle('on', x === s.children[on]);
+}
 function quiz(){
+  const t = wState.token;
   writer.quiz({
     onComplete: s => {
-      if (answered) return;
-      const ok = !wState.outline && s.totalMistakes <= 2;
+      if (answered || t !== wToken) return;
+      wState.slips += s.totalMistakes;
+      fillSlot(wState.k, wState.k + 1);
+      if (wState.k < wState.chars.length - 1){
+        wState.k++;
+        $('fb').textContent = `Now character ${wState.k + 1} of ${wState.chars.length}.`;
+        writer.setCharacter(wState.chars[wState.k]).then(() => {
+          if (answered || t !== wToken) return;
+          if (wState.outline) writer.showOutline(); else writer.hideOutline();
+          if ($('wParts').getAttribute('aria-pressed') === 'true') $('wpartsBox').innerHTML = originHTML(wState.chars[wState.k], {partsOnly: true});
+          quiz();
+        });
+        return;
+      }
+      const n = wState.chars.length, slips = wState.slips, ok = !wState.outline && slips <= 2 * n;
       answered = true; record(wState.day, ok);
-      reveal(wState.day, ok, ok ? `Nice, ${s.totalMistakes} slip${s.totalMistakes===1?'':'s'}` : (wState.outline ? 'Done with the outline on' : `${s.totalMistakes} slips, try this one again later`));
+      reveal(wState.day, ok, ok ? `Nice, ${slips} slip${slips===1?'':'s'}` : (wState.outline ? 'Done with the outline on' : `${slips} slips, try this one again later`));
       $('wpartsBox').innerHTML = '';
     }
   });
@@ -485,7 +643,7 @@ $('wParts').addEventListener('click', () => {
   if (!wState || answered) return;
   const on = $('wParts').getAttribute('aria-pressed') !== 'true';
   $('wParts').setAttribute('aria-pressed', on);
-  $('wpartsBox').innerHTML = on ? originHTML(wState.day, {partsOnly: true}) : '';
+  $('wpartsBox').innerHTML = on ? originHTML(wState.chars[wState.k], {partsOnly: true}) : '';
 });
 $('wHint').addEventListener('click', () => {
   if (!writer || answered) return;
@@ -493,36 +651,51 @@ $('wHint').addEventListener('click', () => {
 });
 $('wRedo').addEventListener('click', () => { if (!writer || answered) return; writer.cancelQuiz(); quiz(); });
 $('wShow').addEventListener('click', giveUp);
-function giveUp(){
+// Show me: count it as missed, then animate the whole word, character by character
+async function giveUp(){
   if (!writer) return;
-  writer.cancelQuiz();
+  const w = writer, t = wState.token = ++wToken; // also stops an earlier "Show me" still animating
+  w.cancelQuiz();
   if (!answered){ answered = true; record(wState.day, false); reveal(wState.day, false, 'Watch the stroke order'); $('wpartsBox').innerHTML = ''; }
-  writer.hideOutline(); writer.animateCharacter();
+  wState.chars.forEach((c, i) => fillSlot(i, -1));
+  const live = () => writer === w && t === wToken;
+  try {
+    for (let i = 0; i < wState.chars.length && live(); i++){
+      if (wState.chars.length > 1){ await w.setCharacter(wState.chars[i]); fillSlot(i, i); }
+      if (!live()) return;
+      w.hideOutline(); await w.animateCharacter();
+      if (i < wState.chars.length - 1) await new Promise(r => setTimeout(r, 450));
+    }
+  } catch (e) {}
 }
 
 /* ---------- study ---------- */
-let St = null, sWriter = null;
+let St = null, sWriters = null, sToken = 0;
 function startStudy(days){ St = {days, i: 0}; show('study'); paintStudy(); }
 function paintStudy(){
-  sWriter = null;
+  sWriters = null; sToken++;
   const day = St.days[St.i], [c, py, mn] = WORDS[day-1];
   $('sBar').style.width = ((St.i + 1) / St.days.length * 100) + '%';
-  $('sTally').textContent = `${St.i + 1} / ${St.days.length} · Day ${day}`;
-  $('sCard').innerHTML = `<div class="box" id="sbox">${GRID}<div class="glyph" id="sglyph">${c}</div><div class="writer" id="starget"></div></div>
+  $('sTally').textContent = `${St.i + 1} / ${St.days.length} · ${tag(day)}`;
+  $('sCard').innerHTML = `${boxesHTML(c, 's')}
     <p class="py">${esc(py)}</p><p class="meaning">${esc(mn)}</p>
     <div class="row" style="justify-content:center"><button class="pill" id="sAnim">✍️ Stroke order</button>${speakBtn(c)}</div>
-    ${originHTML(day)}`;
+    ${originsHTML(c)}`;
   $('sPrev').disabled = St.i === 0; $('sPrev').style.visibility = St.i === 0 ? 'hidden' : 'visible';
   $('sNext').textContent = St.i === St.days.length - 1 ? 'Done' : 'Next';
 }
-$('sCard').addEventListener('click', e => {
+// Animate every character of the item in turn, each in its own box
+$('sCard').addEventListener('click', async e => {
   if (!e.target.closest('#sAnim') || typeof HanziWriter === 'undefined') return;
-  const c = WORDS[St.days[St.i]-1][0];
-  if (!sWriter){
-    $('sglyph').hidden = true;
-    sWriter = makeWriter('starget', c, $('sbox').clientWidth - 4, {showCharacter: false, showOutline: true});
-  }
-  sWriter.animateCharacter();
+  const cs = [...WORDS[St.days[St.i]-1][0]], t = ++sToken;
+  if (!sWriters) sWriters = cs.map((c, i) => {
+    $('sglyph' + i).hidden = true;
+    return makeWriter('starget' + i, c, $('sbox' + i).clientWidth - 4, {showCharacter: false, showOutline: true});
+  });
+  try {
+    for (const w of sWriters) w.hideCharacter();
+    for (let i = 0; i < sWriters.length && t === sToken; i++) await sWriters[i].animateCharacter();
+  } catch (err) {}
 });
 function studyStep(dir){
   const n = St.i + dir;
@@ -551,7 +724,7 @@ function finish(early){
   const uniq = [...new Set(Q.missed)];
   for (const id of ['missPanel','again','studyMissed']) $(id).hidden = !uniq.length;
   $('missList').innerHTML = uniq.map(d => { const [c,py,mn] = WORDS[d-1];
-    return `<button data-day="${d}"><span class="h">${c}</span><span class="d">Day ${d}</span><span class="t"><b>${esc(py)}</b>${esc(mn)}</span></button>`; }).join('');
+    return `<button data-day="${d}"><span class="h${[...c].length > 2 ? ' long' : ''}">${c}</span><span class="t"><span class="d">${tag(d)}</span><b>${esc(py)}</b>${esc(mn)}</span></button>`; }).join('');
   Q.retry = uniq;
   show('results');
 }
@@ -587,7 +760,14 @@ try {
   }
 } catch (e) {}
 
-paintSetup();
+// Open the curriculum used last time
+if (S.cur === 'hsk'){
+  paintCur(); setBusy(true);
+  loadHSK().then(() => { setBusy(false); activate('hsk'); paintSetup(); }).catch(() => {
+    setBusy(false); S.cur = 'freq'; paintSetup();
+    $('err').textContent = 'The HSK list could not load, so the Top 1,000 list is open. Open the app once while online so HSK is saved for offline use.'; $('err').hidden = false;
+  });
+} else paintSetup();
 </script>
 
 </body>

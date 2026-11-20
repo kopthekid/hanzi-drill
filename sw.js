@@ -1,18 +1,21 @@
 // Hanzi Drill offline cache.
 // When you change any file, bump VERSION so phones pick up the new copy.
-const VERSION = 'hanzi-drill-v2';
+const VERSION = 'hanzi-drill-v3';
+// Everything is saved at install, both curricula included, so either one works offline.
 const FILES = [
   './',
   'index.html',
   'data.js',
+  'hsk.js',
   'hanzi-writer.min.js',
   'manifest.webmanifest',
   'icons/icon-192.png',
   'icons/icon-512.png',
   'icons/maskable-512.png',
   'icons/apple-touch-icon.png',
-  'strokes/s0.json', 'strokes/s1.json', 'strokes/s2.json', 'strokes/s3.json', 'strokes/s4.json',
-  'strokes/s5.json', 'strokes/s6.json', 'strokes/s7.json', 'strokes/s8.json', 'strokes/s9.json',
+  // stroke data: s* for the 1,000 list, h* for the other HSK characters
+  ...Array.from({length: 10}, (_, i) => `strokes/s${i}.json`),
+  ...Array.from({length: 11}, (_, i) => `strokes/h${i}.json`),
 ];
 
 self.addEventListener('install', event => {
